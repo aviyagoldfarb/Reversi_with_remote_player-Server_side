@@ -6,8 +6,8 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <unistd.h>
-#include "string.h"
-#include "iostream"
+#include <string.h>
+#include <iostream>
 #include <stdio.h>
 
 
@@ -24,7 +24,7 @@ void Server::start() {
     if (serverSocket == -1) {
         throw "Error opening socket";
     }
-
+    // Assign a local address to the socket
     struct sockaddr_in serverAddress;
     bzero((void*)&serverAddress, sizeof(serverAddress));
     serverAddress.sin_family = AF_INET;
@@ -36,13 +36,17 @@ void Server::start() {
 
     // Start listening to incoming connections
     listen(serverSocket, MAX_CONNECTED_CLIENTS);
-// Define the client socket's structures
+    // Define the client socket's structures
     struct sockaddr_in clientAddress;
     socklen_t clientAddressLen;
 
+    // looping until two clients create communication
     while (true) {
+        int black = 1;
+        int white = 2;
+        int n;
         cout << "Waiting for clients connections..." << endl;
-// Accept a new client connection
+        // Accept a new client connection
         int blackClientSocket = accept(serverSocket, (struct sockaddr *)&clientAddress, &clientAddressLen);
         cout << "Client 1 connected" << endl;
         if (blackClientSocket == -1)
@@ -51,20 +55,23 @@ void Server::start() {
         cout << "Client 2 connected" << endl;
         if (whiteClientSocket == -1)
             throw "Error on accept 2";
-        int m = 1;
-        int n = write(blackClientSocket, &m, sizeof(m));
+
+        n = write(blackClientSocket, &black, sizeof(black));
         if (n == -1) {
-            cout << "Error writing to socket 1" << endl;
+            cout << "Error writing to blackClientSocket" << endl;
             return;
         }
-        m = 2;
-        n = write(blackClientSocket, &m, sizeof(m));
+
+        n = write(whiteClientSocket, &white, sizeof(white));
         if (n == -1) {
-            cout << "Error writing to socket 2" << endl;
+            cout << "Error writing to whiteClientSocket" << endl;
             return;
         }
-        handleClient(blackClientSocket, whiteClientSocket);
-// Close communication with the clients
+
+        // the game
+        handleClients(blackClientSocket, whiteClientSocket);
+
+        // Close communication with the current clients
         close(blackClientSocket);
         close(whiteClientSocket);
     }
@@ -72,95 +79,100 @@ void Server::start() {
 }
 
 // Handle requests from a specific client
-void Server::handleClient(int blackClientSocket, int whiteClientSocket) {
-    string theChosenCell;
+void Server::handleClients(int blackClientSocket, int whiteClientSocket) {
     int x, y;
-    char psic;
 
     while (true) {
-        int* cells;
         int n;
         string result;
 
         //getting the chosen cell of the black player.
-        cells = this->getCell(blackClientSocket);
-        if (cells[0] == 0) {
+        Point blackPlayerChosenCell = this->readCell(blackClientSocket);
+        /*
+        if (blackPlayerChosenCell.getX() == 0 && blackPlayerChosenCell.getY() == 0) {
             return;
         }
-        cout << "Got exercise: " << x << "," << y  << endl;
-        result = to_string(cells[0]) + "," + to_string(cells[1]);
-        // Write the result back to the white client
-        n = write(whiteClientSocket, &result, sizeof(result));
-        if (n == -1) {
-            cout << "Error writing to socket" << endl;
-            return;
-        }
+        */
+        cout << "Got cell: " << endl;
+        blackPlayerChosenCell.pointToPrint();
+        cout << endl;
 
+        x = blackPlayerChosenCell.getX();
+        y = blackPlayerChosenCell.getY();
+
+        // write the result back to the white client
+        n = write(whiteClientSocket, &x, sizeof(x));
+        if (n == -1) {
+            cout << "Error writing to whiteClientSocket" << endl;
+            return;
+        }
+        n = write(whiteClientSocket, &y, sizeof(y));
+        if (n == -1) {
+            cout << "Error writing to whiteClientSocket" << endl;
+            return;
+        }
 
         //getting the chosen cell of the white player.
-        cells = this->getCell(whiteClientSocket);
-        if (cells[0] == 0) {
+        Point whitePlayerChosenCell = this->readCell(whiteClientSocket);
+        /*
+        if (whitePlayerChosenCell.getX() == 0 && whitePlayerChosenCell.getY() == 0) {
             return;
         }
-        cout << "Got exercise: " << x << "," << y  << endl;
-        result = to_string(cells[0]) + "," + to_string(cells[1]);
+        */
+        cout << "Got cell: " << endl;
+        whitePlayerChosenCell.pointToPrint();
+        cout << endl;
+
+        x = whitePlayerChosenCell.getX();
+        y = whitePlayerChosenCell.getY();
+
         // Write the result back to the black client
-        n = write(blackClientSocket, &result, sizeof(result));
+        n = write(blackClientSocket, &x, sizeof(x));
         if (n == -1) {
-            cout << "Error writing to socket" << endl;
+            cout << "Error writing to blackClientSocket" << endl;
             return;
         }
-
-
+        n = write(blackClientSocket, &y, sizeof(y));
+        if (n == -1) {
+            cout << "Error writing to blackClientSocket" << endl;
+            return;
+        }
 
     }
 
 }
-
 
 void Server::stop() {
     close(serverSocket);
 }
 
-int* Server::getCell(int client) {
-    int cells[0, 0];
+Point Server::readCell(int client) {
+    Point chosenCell(0, 0);
     int x, y;
-    char psic;
-    int n = read(client, &x, sizeof(x));
-    if (n == -1) {
-        cout << "Error reading the chosen cell" << endl;
-        return cells;
-    }
-    if (n == 0) {
-        cout << "Client disconnected" << endl;
-        return cells;
-    }
-    if (x == 0) {
-        return cells;
-    }
+    int n;
 
-    n = read(client, &psic, sizeof(psic));
+    n = read(client, &x, sizeof(x));
     if (n == -1) {
         cout << "Error reading the chosen cell" << endl;
-        return cells;
+        return chosenCell;
     }
     if (n == 0) {
         cout << "Client disconnected" << endl;
-        return cells;
+        return chosenCell;
     }
 
     n = read(client, &y, sizeof(y));
     if (n == -1) {
         cout << "Error reading the chosen cell" << endl;
-        return cells;
+        return chosenCell;
     }
     if (n == 0) {
         cout << "Client disconnected" << endl;
-        return cells;
+        return chosenCell;
     }
-    cells[0] = x;
-    cells[1] = y;
 
-    return cells;
+    chosenCell.setX(x);
+    chosenCell.setY(y);
 
+    return chosenCell;
 }

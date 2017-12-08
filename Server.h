@@ -5,20 +5,21 @@
 #ifndef EX4_SERVER_SERVER_H
 #define EX4_SERVER_SERVER_H
 
+#include "Point.h"
 
 class Server {
 public:
     Server(int port);
     void start();
     void stop();
-    int* getCell(int client);
+    Point readCell(int client);
 
 private:
     int port;
     // the socket's file descriptor
     int serverSocket;
 
-    void handleClient(int blackClientSocket, int whiteClientSocket);
+    void handleClients(int blackClientSocket, int whiteClientSocket);
 };
 
 
