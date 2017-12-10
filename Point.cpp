@@ -1,5 +1,5 @@
 //
-// Created by aviya on 07/12/17.
+// Udi Goldman 301683264 , Aviya Goldfarb 201509635
 //
 
 #include "Point.h"

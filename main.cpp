@@ -1,11 +1,21 @@
+//
+// Udi Goldman 301683264 , Aviya Goldfarb 201509635
+//
+
 #include "Server.h"
-#include <iostream>
 #include <stdlib.h>
+#include <iostream>
+#include <fstream>
 
 using namespace std;
 
 int main() {
-    Server server(8000);
+    int port;
+    ifstream inFile;
+    inFile.open("../server_configuration_file.txt");
+    inFile >> port;
+
+    Server server(port);
     try {
         server.start();
     } catch (const char *msg) {
