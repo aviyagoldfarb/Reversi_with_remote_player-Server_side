@@ -10,9 +10,10 @@
 #include <iostream>
 #include <stdio.h>
 
+#define MAX_CONNECTED_CLIENTS 2
 
 using namespace std;
-#define MAX_CONNECTED_CLIENTS 2;
+
 
 Server::Server(int port) :port(port), serverSocket(0) {
     cout << "Server" << endl;
@@ -88,12 +89,12 @@ void Server::handleClients(int blackClientSocket, int whiteClientSocket) {
 
         //getting the chosen cell of the black player.
         Point blackPlayerChosenCell = this->readCell(blackClientSocket);
-        /*
-        if (blackPlayerChosenCell.getX() == 0 && blackPlayerChosenCell.getY() == 0) {
+
+        if (blackPlayerChosenCell.getX() == -1 && blackPlayerChosenCell.getY() == -1) {
             return;
         }
-        */
-        cout << "Got cell: " << endl;
+
+        cout << "Got cell: ";
         blackPlayerChosenCell.pointToPrint();
         cout << endl;
 
@@ -114,12 +115,12 @@ void Server::handleClients(int blackClientSocket, int whiteClientSocket) {
 
         //getting the chosen cell of the white player.
         Point whitePlayerChosenCell = this->readCell(whiteClientSocket);
-        /*
-        if (whitePlayerChosenCell.getX() == 0 && whitePlayerChosenCell.getY() == 0) {
+
+        if (whitePlayerChosenCell.getX() == -1 && whitePlayerChosenCell.getY() == -1) {
             return;
         }
-        */
-        cout << "Got cell: " << endl;
+
+        cout << "Got cell: ";
         whitePlayerChosenCell.pointToPrint();
         cout << endl;
 
