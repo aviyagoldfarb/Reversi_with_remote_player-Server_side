@@ -85,7 +85,6 @@ void Server::handleClients(int blackClientSocket, int whiteClientSocket) {
 
     while (true) {
         int n;
-        string result;
 
         //getting the chosen cell of the black player.
         Point blackPlayerChosenCell = this->readCell(blackClientSocket);
@@ -94,9 +93,11 @@ void Server::handleClients(int blackClientSocket, int whiteClientSocket) {
             return;
         }
 
+
         cout << "Got cell: ";
         blackPlayerChosenCell.pointToPrint();
         cout << endl;
+
 
         x = blackPlayerChosenCell.getX();
         y = blackPlayerChosenCell.getY();
@@ -120,9 +121,11 @@ void Server::handleClients(int blackClientSocket, int whiteClientSocket) {
             return;
         }
 
+
         cout << "Got cell: ";
         whitePlayerChosenCell.pointToPrint();
         cout << endl;
+
 
         x = whitePlayerChosenCell.getX();
         y = whitePlayerChosenCell.getY();
@@ -148,7 +151,7 @@ void Server::stop() {
 }
 
 Point Server::readCell(int client) {
-    Point chosenCell(0, 0);
+    Point chosenCell(-1, -1);
     int x, y;
     int n;
 
